@@ -1,0 +1,20 @@
+For regional analyses, a local UTM (Universal Transverse Mercator) zone is often more suitable. UTM divides the world into 60 zones and each zone has an EPSG code. If you're working with a specific location, you can find out which UTM zone it falls into and use that as your target_crs.
+
+There is a Python package named utm that can be used to convert latitude and longitude to UTM and vice versa. This package can also provide the UTM zone for given coordinates.
+
+Here's how you might use it:
+
+import utm
+
+# Get the latitude and longitude for a place
+location = ox.geocode(place_name)
+lat, lon = location
+
+# Get the UTM zone for the place
+_, _, zone_number, zone_letter = utm.from_latlon(lat, lon)
+
+# Construct the EPSG code for the UTM zone
+target_crs = f"EPSG:{32600 + zone_number if lat >= 0 else 32700 + zone_number}"
+
+
+In this code, the from_latlon() function from the utm package returns several values, including the UTM zone number and letter. The EPSG code for a UTM zone can be constructed by adding the zone number to 32600 for northern hemisphere zones and 32700 for southern hemisphere zones.
