@@ -2,65 +2,21 @@
 <html>
 <head>
     <title>City Autocomplete</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <style>
-        body {
-            font-family: 'Libre Franklin', sans-serif;
-        }
-        .form-container {
-            max-width: 300px;
-        }
-        h1 {
-            text-align: center;
-            padding-bottom: 20px;
-        }
-        ul {
-            padding: 0;
-            margin-top: 10px;
-        }
-        li {
-            list-style-type: none;
-            background: #f8f9fa;
-            margin: 5px 0;
-            padding: 5px;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-6 col-lg-4">
-                <h1>GEONAMES</h1>
-                <div class="form-container">
-                    <div class="form-group">
-                        <label for="country">Country:</label>
-                        <select id="country" class="form-control">
-                            <option value="">Select a country</option>
-                            <!-- Other country options -->
-                            <option value="CA" selected>CA</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="city">City:</label>
-                        <input type="text" id="city" class="form-control" placeholder="Enter city name">
-                    </div>
-                </div>
-                <ul id="suggestions"></ul>
-            </div>
-        </div>
-    </div>
+    <select id="country">
+        <option value="">Select a country</option>
+    </select>
+
+    <input type="text" id="city" placeholder="Enter city name" disabled>
+    <ul id="suggestions"></ul>
 
     <script>
         $(document).ready(function() {
             var countries = ["US", "CA", "GB", "FR", "DE", "IT", "ES"]; // Add more countries as needed
             var countryOptions = countries.map(function(country) {
-                var selected = (country === "CA") ? " selected" : "";
-                return "<option value='" + country + "'" + selected + ">" + country + "</option>";
+                return "<option value='" + country + "'>" + country + "</option>";
             });
             $("#country").append(countryOptions.join(""));
 
@@ -72,9 +28,6 @@
                     $("#city").prop("disabled", true);
                 }
             });
-
-            // Since "CA" is preselected, we should enable the city input field on page load
-            $("#city").prop("disabled", false);
 
             $("#city").on("input", function() {
                 var cityName = $(this).val();
