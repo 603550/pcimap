@@ -14,6 +14,9 @@
             width: 300px;
         }
         ul {
+            position: absolute;
+            top: 100%;
+            width: 100%;
             padding: 0;
         }
         li {
@@ -32,11 +35,13 @@
             <label for="country">Country:</label>
             <select id="country" class="form-control">
                 <option value="">Select a country</option>
+                <!-- Other country options -->
+                <option value="CA" selected>CA</option>
             </select>
         </div>
         <div class="form-group">
             <label for="city">City:</label>
-            <input type="text" id="city" class="form-control" placeholder="Enter city name" disabled>
+            <input type="text" id="city" class="form-control" placeholder="Enter city name">
         </div>
         <ul id="suggestions"></ul>
     </div>
@@ -45,7 +50,8 @@
         $(document).ready(function() {
             var countries = ["US", "CA", "GB", "FR", "DE", "IT", "ES"]; // Add more countries as needed
             var countryOptions = countries.map(function(country) {
-                return "<option value='" + country + "'>" + country + "</option>";
+                var selected = (country === "CA") ? " selected" : "";
+                return "<option value='" + country + "'" + selected + ">" + country + "</option>";
             });
             $("#country").append(countryOptions.join(""));
 
@@ -57,6 +63,9 @@
                     $("#city").prop("disabled", true);
                 }
             });
+
+            // Since "CA" is preselected, we should enable the city input field on page load
+            $("#city").prop("disabled", false);
 
             $("#city").on("input", function() {
                 var cityName = $(this).val();
