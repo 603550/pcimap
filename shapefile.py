@@ -5,8 +5,8 @@ import geopandas as gpd
 from shapely.geometry import Point, LineString
 from shapely.ops import linemerge
 
-# Define the place name or OSM Relation ID
-place_name = "R197569"
+# Define the place name or coordinates
+place_name = "Hampstead, Montreal, Canada"
 
 # CRS Info
 source_crs = "EPSG:4326"
@@ -31,7 +31,7 @@ buffered_polygon_large = buffered_polygon_large.unary_union
 buffered_polygon_small = buffered_polygon_small.unary_union
 
 # Retrieve the street network within the buffered polygon
-G = ox.graph_from_polygon(buffered_polygon_large, network_type="all")
+G = ox.graph_from_polygon(buffered_polygon_large, network_type="drive", retain_all=True)
 
 # Convert the street network to a GeoDataFrame
 streets = ox.graph_to_gdfs(G, nodes=False, edges=True)
