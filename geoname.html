@@ -3,9 +3,13 @@
 <head>
     <title>City Autocomplete</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin&display=swap" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <style>
+        body {
+            font-family: 'Libre Franklin', sans-serif;
+        }
         .form-container {
             position: absolute;
             top: 50%;
@@ -14,10 +18,9 @@
             width: 300px;
         }
         ul {
-            position: absolute;
-            top: 100%;
             width: 100%;
             padding: 0;
+            margin-top: 10px;
         }
         li {
             list-style-type: none;
@@ -27,21 +30,28 @@
             border: 1px solid #dee2e6;
             border-radius: 5px;
         }
+        h1 {
+            text-align: center;
+            padding-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container form-container">
-        <div class="form-group">
-            <label for="country">Country:</label>
-            <select id="country" class="form-control">
-                <option value="">Select a country</option>
-                <!-- Other country options -->
-                <option value="CA" selected>CA</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="city">City:</label>
-            <input type="text" id="city" class="form-control" placeholder="Enter city name">
+    <h1>GEONAMES</h1>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-group">
+                <label for="country">Country:</label>
+                <select id="country" class="form-control">
+                    <option value="">Select a country</option>
+                    <!-- Other country options -->
+                    <option value="CA" selected>CA</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="city">City:</label>
+                <input type="text" id="city" class="form-control" placeholder="Enter city name">
+            </div>
         </div>
         <ul id="suggestions"></ul>
     </div>
