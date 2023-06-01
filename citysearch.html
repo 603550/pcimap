@@ -121,6 +121,12 @@
                         }
                     }
 
+                    if (table.find('tr').length > 0) {
+                        $('#submitButton').show();
+                    } else {
+                        $('#submitButton').hide();
+                    }
+
                     $('#results tr').click(function() {
                         $('#results tr').removeClass('selected');
                         $(this).addClass('selected');
@@ -147,7 +153,7 @@
         });
 
         function confirmSubmission() {
-            if (confirm("Are you sure you want to submit?")) {
+            if (confirm("Are you sure you want to submit this request?")) {
                 // Handle the submission here
                 alert("Submitted!");
             }
