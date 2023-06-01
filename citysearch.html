@@ -6,48 +6,64 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            font-family: Arial, sans-serif;
-        }
+		body {
+		    padding-top: 50px;
+		    font-family: Arial, sans-serif;
+		}
 
-        #map {
-            height: 400px;
-            width: 100%;
-        }
+		#map {
+		    height: 400px;
+		    width: 100%;
+		    margin-bottom: 20px;
+		}
 
-        #cityInput, {
-            margin: 5px;
-            width: 25px;
-        }
-        
-        #countrySelect {
-            margin: 5px;
-            width: 155px;
-        }
+		#cityInput {
+		    margin: 5px;
+		    width: 100%;
+		    max-width: 300px;
+		}
 
-        #searchButton {
-            margin: 5px;
-            width: 100px;
-        }
+		#countrySelect {
+		    margin: 5px;
+		    width: 100%;
+		    max-width: 300px;
+		}
 
-        ul {
-            text-align: center;
-            width: 600px;
-            list-style-type: none;
-        }
+		#searchButton {
+		    margin: 5px;
+		    width: 100%;
+		    max-width: 100px;
+		}
 
-        .selected {
-            background-color: #fff111;
-        }
+		table {
+		    border-collapse: collapse;
+		    width: 100%;
+		}
 
-        h1 {
-            font-family: 'Libre Franklin', Arial, sans-serif;
-        }
+		td {
+		    padding: 8px;
+		    text-align: left;
+		}
+
+		tr.selected td {
+		    background-color: #fff111;
+		}
+
+		h1 {
+		    font-family: 'Libre Franklin', Arial, sans-serif;
+		}
+
+		@media (min-width: 768px) {
+		    #map {
+		        height: 600px;
+		    }
+
+		    #cityInput, #countrySelect {
+		        width: 155px;
+		        max-width: initial;
+		    }
+		}
+    
     </style>
 </head>
 <body>
@@ -64,7 +80,7 @@
     </select>
     <input type="text" id="cityInput" placeholder="Enter city name">
     <button id="searchButton">Search</button>
-    <ul id="results"></ul>
+    <table id="results"></table>
     <div id="map"></div>
 
     <script>
@@ -79,15 +95,18 @@
                 var cityName = $('#cityInput').val();
                 var countryName = $('#countrySelect').val();
                 $.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&q=' + cityName + ',' + countryName, function(data) {
-                    $('#results').empty();
+                    var table = $('#results');
+                    table.empty();
+
                     for (var i = 0; i < data.length; i++) {
                         if (data[i].geojson.type === 'Polygon') {
-                            $('#results').append('<li data-index="' + i + '">' + data[i].display_name + '</li>');
+                            var row = '<tr data-index="' + i + '"><td>' + data[i].display_name + '</td></tr>';
+                            table.append(row);
                         }
                     }
 
-                    $('#results li').click(function() {
-                        $('#results li').removeClass('selected');
+                    $('#results tr').click(function() {
+                        $('#results tr').removeClass('selected');
                         $(this).addClass('selected');
 
                         var index = $(this).data('index');
@@ -103,7 +122,7 @@
                     });
 
                     // Automatically select the first result
-                    $('#results li:first-child').click();
+                    $('#results tr:first-child').click();
                 });
             });
         });
