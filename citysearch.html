@@ -1,73 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>OSM City Search</title>
+    <title>PCIMAP / City Search</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
-		body {
-		    padding-top: 50px;
-		    font-family: Arial, sans-serif;
-		}
+        body {
+            padding-top: 50px;
+            font-family: Arial, sans-serif;
+        }
 
-		#map {
-		    height: 400px;
-		    width: 100%;
-		    margin-bottom: 20px;
-		}
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-		#cityInput {
-		    margin: 5px;
-		    width: 100%;
-		    max-width: 300px;
-		}
+        #cityInput {
+            margin: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
 
-		#countrySelect {
-		    margin: 5px;
-		    width: 100%;
-		    max-width: 300px;
-		}
+        #countrySelect {
+            margin: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
 
-		#searchButton {
-		    margin: 5px;
-		    width: 100%;
-		    max-width: 100px;
-		}
+        #searchButton {
+            margin: 5px;
+            width: 100%;
+            max-width: 100px;
+        }
 
-		table {
-		    border-collapse: collapse;
-		    width: 100%;
-		}
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
 
-		td {
-		    padding: 8px;
-		    text-align: left;
-		}
+        td {
+            padding: 8px;
+            text-align: left;
+        }
 
-		tr.selected td {
-		    background-color: #fff111;
-		}
+        tr.selected td {
+            background-color: #fff111;
+        }
 
-		h1 {
-		    font-family: 'Libre Franklin', Arial, sans-serif;
-		}
+        h1 {
+            font-family: 'Libre Franklin', Arial, sans-serif;
+        }
 
-		@media (min-width: 768px) {
-		    #map {
-		        height: 600px;
-		    }
+        #submitButton {
+            display: none;
+            margin: 5px;
+            width: 100%;
+            max-width: 100px;
+        }
 
-		    #cityInput, #countrySelect {
-		        width: 155px;
-		        max-width: initial;
-		    }
-		}
-    
+        @media (min-width: 768px) {
+            #map {
+                height: 600px;
+            }
+
+            #cityInput, #countrySelect {
+                width: 155px;
+                max-width: initial;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #map {
+                height: calc(100vh - 360px);
+                margin-bottom: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>OSM City Search</h1>
+    <h1>PCI+MAP / City Search</h1>
     <select id="countrySelect">
         <option value="Canada">Canada</option>
         <option value="United States">United States</option>
@@ -81,6 +94,9 @@
     <input type="text" id="cityInput" placeholder="Enter city name">
     <button id="searchButton">Search</button>
     <table id="results"></table>
+
+    <button id="submitButton" onclick="confirmSubmission()">Submit</button>
+
     <div id="map"></div>
 
     <script>
@@ -119,6 +135,9 @@
                         geojsonLayer = L.geoJSON(geojson);
                         geojsonLayer.addTo(map);
                         map.fitBounds(geojsonLayer.getBounds());
+
+                        // Show submit button only when a row is selected
+                        $('#submitButton').toggle($(this).hasClass('selected'));
                     });
 
                     // Automatically select the first result
@@ -126,6 +145,13 @@
                 });
             });
         });
+
+        function confirmSubmission() {
+            if (confirm("Are you sure you want to submit?")) {
+                // Handle the submission here
+                alert("Submitted!");
+            }
+        }
     </script>
 </body>
 </html>
