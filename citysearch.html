@@ -117,12 +117,16 @@
 	                    var table = $('#results');
 	                    table.empty();
 
-	                    for (var i = 0; i < data.length; i++) {
-	                        var cityName = data[i].display_name; // Directly take the display name
+						for (var i = 0; i < data.length; i++) {
+						    var geojsonType = data[i].geojson.type;
+						    if(geojsonType === 'Polygon' || geojsonType === 'MultiPolygon') {
+						        var cityName = data[i].display_name; // Directly take the display name
 
-	                        var row = '<tr data-index="' + i + '"><td>' + cityName + '</td></tr>';
-	                        table.append(row);
-	                    }
+						        var row = '<tr data-index="' + i + '"><td>' + cityName + '</td></tr>';
+						        table.append(row);
+						    }
+						}
+					
                     
 	                    if (table.find('tr').length > 0) {
 	                        $('#submitButton').show();
