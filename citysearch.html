@@ -102,70 +102,76 @@
 
     <div id="map"></div>
 
-	 <script>
-	        var map = L.map('map').setView([56.1304, -106.3468], 3);
-	        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	            maxZoom: 19,
-	        }).addTo(map);
-	        var geojsonLayer = null;
+	<script>
+	    var map = L.map('map').setView([56.1304, -106.3468], 3);
+	    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	        maxZoom: 19,
+	    }).addTo(map);
+	    var geojsonLayer = null;
 
-	        $(document).ready(function() {
-	            $('#searchButton').click(function() {
-	                var cityName = encodeURIComponent($('#cityInput').val());
-	                var countryName = $('#countrySelect').val();
-	                $.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&addressdetails=1&q=' + cityName + ',' + countryName, function(data) {
-	                    var table = $('#results');
-	                    table.empty();
+	    var minAreaSize = 1000; // Set your minimum area size here in square kilometers
 
-						for (var i = 0; i < data.length; i++) {
-						    var geojsonType = data[i].geojson.type;
-						    if(geojsonType === 'Polygon' || geojsonType === 'MultiPolygon') {
-						        var cityName = data[i].display_name; // Directly take the display name
+	    $(document).ready(function() {
+	        $('#searchButton').click(function() {
+	            var cityName = encodeURIComponent($('#cityInput').val());
+	            var countryName = $('#countrySelect').val();
+	            $.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&addressdetails=1&q=' + cityName + ',' + countryName, function(data) {
+	                var table = $('#results');
+	                table.empty();
 
-						        var row = '<tr data-index="' + i + '"><td>' + cityName + '</td></tr>';
-						        table.append(row);
-						    }
-						}
-					
-                    
-	                    if (table.find('tr').length > 0) {
-	                        $('#submitButton').show();
-	                    } else {
-	                        $('#submitButton').hide();
+	                for (var i = 0; i < data.length; i++) {
+	                    var geojsonType = data[i].geojson.type;
+	                    if(geojsonType === 'Polygon' || geojsonType === 'MultiPolygon') {
+	                        var area = turf.area(data[i].geojson); // calculate area using turf.js
+	                        area = area / 1000; // convert from square meters to square kilometers
+	                        if(area < minAreaSize) {
+	                            continue; // Skip this city if its area is smaller than the minimum area size
+	                        }
+                        
+	                        var cityName = data[i].display_name; // Directly take the display name
+	                        var row = '<tr data-index="' + i + '"><td>' + cityName + '</td></tr>';
+	                        table.append(row);
+	                    }
+	                }
+
+	                if (table.find('tr').length > 0) {
+	                    $('#submitButton').show();
+	                } else {
+	                    $('#submitButton').hide();
+	                }
+
+	                $('#results tr').click(function() {
+	                    $('#results tr').removeClass('selected');
+	                    $(this).addClass('selected');
+
+	                    var index = $(this).data('index');
+	                    var geojson = data[index].geojson;
+
+	                    if (geojsonLayer != null) {
+	                        map.removeLayer(geojsonLayer);
+	                        geojsonLayer = null;  // Clear the variable after removing the layer
 	                    }
 
-	                    $('#results tr').click(function() {
-	                        $('#results tr').removeClass('selected');
-	                        $(this).addClass('selected');
+	                    geojsonLayer = L.geoJSON(geojson);
+	                    geojsonLayer.addTo(map);
+	                    map.fitBounds(geojsonLayer.getBounds());
 
-	                        var index = $(this).data('index');
-	                        var geojson = data[index].geojson;
-
-	                        if (geojsonLayer != null) {
-	                            map.removeLayer(geojsonLayer);
-	                            geojsonLayer = null;  // Clear the variable after removing the layer
-	                        }
-
-	                        geojsonLayer = L.geoJSON(geojson);
-	                        geojsonLayer.addTo(map);
-	                        map.fitBounds(geojsonLayer.getBounds());
-
-	                        // Show submit button only when a row is selected
-	                        $('#submitButton').toggle($(this).hasClass('selected'));
-	                    });
-                
-	                    // Automatically select the first result
-	                    $('#results tr:first-child').click();
+	                    // Show submit button only when a row is selected
+	                    $('#submitButton').toggle($(this).hasClass('selected'));
 	                });
+
+	                // Automatically select the first result
+	                $('#results tr:first-child').click();
 	            });
 	        });
+	    });
 
-	        function confirmSubmission() {
-	            if (confirm("Are you sure you want to submit this request?")) {
-	                // Handle the submission here
-	                alert("Submitted!");
-	            }
+	    function confirmSubmission() {
+	        if (confirm("Are you sure you want to submit this request?")) {
+	            // Handle the submission here
+	            alert("Submitted!");
 	        }
-	    </script>
+	    }
+	</script>
 	</body>
 	</html>
