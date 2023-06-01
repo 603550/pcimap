@@ -3,6 +3,8 @@
 <head>
     <title>PCIMAP / City Search</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.6/turf.min.js"></script>
+	
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
@@ -107,24 +109,29 @@
         var geojsonLayer = null;
 
         $(document).ready(function() {
-            $('#searchButton').click(function() {
-				var cityName = encodeURIComponent($('#cityInput').val());
-				var countryName = $('#countrySelect').val();
-				$.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&q=' + cityName + ',' + countryName, function(data) {
-                    var table = $('#results');
-                    table.empty();
+			$('#searchButton').click(function() {
+			    var cityName = encodeURIComponent($('#cityInput').val());
+			    var countryName = $('#countrySelect').val();
+			    $.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&addressdetails=1&q=' + cityName + ',' + countryName, function(data) {
+			        var table = $('#results');
+			        table.empty();
 
-					for (var i = 0; i < data.length; i++) {
-					    if (data[i].geojson.type === 'Polygon') {
-					        var addressComponents = data[i].display_name.split(", ");
-					        var cityName = addressComponents[0]; // City Name
-					        var stateName = addressComponents[addressComponents.length - 3]; // State Name
-					        var countryName = addressComponents[addressComponents.length - 1]; // Country Name
+			        for (var i = 0; i < data.length; i++) {
+			            if (data[i].geojson.type === 'Polygon') {
+			                // Calculate the area of the polygon
+			                var area = turf.area(data[i].geojson);
 
-					        var row = '<tr data-index="' + i + '"><td>' + cityName + ', ' + stateName + ', ' + countryName + '</td></tr>';
-					        table.append(row);
-					    }
-					}
+			                // Check if the area is above a certain threshold (for example, 1 square kilometer)
+			                if (area > 1000000) {
+			                    var cityName = data[i].address.city || data[i].address.town || data[i].address.village || ''; // City Name
+			                    var stateName = data[i].address.state || ''; // State Name
+			                    var countryName = data[i].address.country || ''; // Country Name
+
+			                    var row = '<tr data-index="' + i + '"><td>' + cityName + ', ' + stateName + ', ' + countryName + '</td></tr>';
+			                    table.append(row);
+			                }
+			            }
+			        }
                     
 
                     if (table.find('tr').length > 0) {
