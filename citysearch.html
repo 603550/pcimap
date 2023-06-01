@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OSM City Search</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+
+        #cityInput, {
+            margin: 5px;
+            width: 25px;
+        }
+        
+        #countrySelect {
+            margin: 5px;
+            width: 155px;
+        }
+
+        #searchButton {
+            margin: 5px;
+            width: 100px;
+        }
+
+        ul {
+            text-align: center;
+            width: 600px;
+            list-style-type: none;
+        }
+
+        .selected {
+            background-color: #fff111;
+        }
+
+        h1 {
+            font-family: 'Libre Franklin', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>OSM City Search</h1>
+    <select id="countrySelect">
+        <option value="Canada">Canada</option>
+        <option value="United States">United States</option>
+        <option value="Canada">Japan</option>
+        <option value="Austria">Austria</option>
+        <option value="France">France</option>
+        <option value="United Kingdom">United Kingdom</option>
+        <option value="Mexico">Mexico</option>
+        <option value="Israel">Israel</option>
+    </select>
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <button id="searchButton">Search</button>
+    <ul id="results"></ul>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map').setView([56.1304, -106.3468], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+        var geojsonLayer = null;
+
+        $(document).ready(function() {
+            $('#searchButton').click(function() {
+                var cityName = $('#cityInput').val();
+                var countryName = $('#countrySelect').val();
+                $.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&q=' + cityName + ',' + countryName, function(data) {
+                    $('#results').empty();
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].geojson.type === 'Polygon') {
+                            $('#results').append('<li data-index="' + i + '">' + data[i].display_name + '</li>');
+                        }
+                    }
+
+                    $('#results li').click(function() {
+                        $('#results li').removeClass('selected');
+                        $(this).addClass('selected');
+
+                        var index = $(this).data('index');
+                        var geojson = data[index].geojson;
+
+                        if (geojsonLayer != null) {
+                            map.removeLayer(geojsonLayer);
+                        }
+
+                        geojsonLayer = L.geoJSON(geojson);
+                        geojsonLayer.addTo(map);
+                        map.fitBounds(geojsonLayer.getBounds());
+                    });
+
+                    // Automatically select the first result
+                    $('#results li:first-child').click();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
