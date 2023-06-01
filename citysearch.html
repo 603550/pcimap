@@ -77,98 +77,94 @@
                 margin-bottom: 0;
             }
         }
-		</style>
-		</head>
-		<body>
-		    <h1>PCI+MAP / City Search</h1>
-		    <select id="countrySelect">
-		        <option value="Canada">Canada</option>
-		        <option value="United States">United States</option>
-		        <option value="Japan">Japan</option>
-		        <option value="Austria">Austria</option>
-		        <option value="France">France</option>
-		        <option value="United Kingdom">United Kingdom</option>
-		        <option value="Mexico">Mexico</option>
-		        <option value="Israel">Israel</option>
-		    </select>
-		    <input type="text" id="cityInput" placeholder="Enter city name">
-		    <button id="searchButton">Search</button>
-		    <table id="results"></table>
+    </style>
+</head>
+<body>
+    <h1>PCI+MAP / City Search</h1>
+    <select id="countrySelect">
+        <option value="Canada">Canada</option>
+        <option value="United States">United States</option>
+        <option value="Japan">Japan</option>
+        <option value="Austria">Austria</option>
+        <option value="France">France</option>
+        <option value="United Kingdom">United Kingdom</option>
+        <option value="Mexico">Mexico</option>
+        <option value="Israel">Israel</option>
+    </select>
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <button id="searchButton">Search</button>
+    <table id="results"></table>
 
-		    <button id="submitButton" onclick="confirmSubmission()">Submit</button>
+    <button id="submitButton" onclick="confirmSubmission()">Submit</button>
 
-		    <div id="map"></div>
+    <div id="map"></div>
 
-		    <script>
-		        var map = L.map('map').setView([56.1304, -106.3468], 3);
-		        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		            maxZoom: 19,
-		        }).addTo(map);
-		        var geojsonLayer = null;
+    <script>
+        var map = L.map('map').setView([56.1304, -106.3468], 3);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+        var geojsonLayer = null;
 
-		        $(document).ready(function() {
-		            $('#searchButton').click(function() {
-		                var cityName = $('#cityInput').val();
-		                var countryName = $('#countrySelect').val();
-		                $.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&q=' + cityName + ',' + countryName, function(data) {
-		                    var table = $('#results');
-		                    table.empty();
+        $(document).ready(function() {
+            $('#searchButton').click(function() {
+				var cityName = encodeURIComponent($('#cityInput').val());
+				var countryName = $('#countrySelect').val();
+				$.get('https://nominatim.openstreetmap.org/search?format=json&polygon_geojson=1&q=' + cityName + ',' + countryName, function(data) {
+                    var table = $('#results');
+                    table.empty();
 
-		                    for (var i = 0; i < data.length; i++) {
-		                        if (data[i].geojson.type === 'Polygon') {
-									var fullName = data[i].display_name.split(','); // Splitting display_name
-									var provinceCountry = fullName.splice(-2); // Getting the last two elements
+					for (var i = 0; i < data.length; i++) {
+					    if (data[i].geojson.type === 'Polygon') {
+					        var addressComponents = data[i].display_name.split(", ");
+					        var cityName = addressComponents[0]; // City Name
+					        var stateName = addressComponents[addressComponents.length - 3]; // State Name
+					        var countryName = addressComponents[addressComponents.length - 1]; // Country Name
 
-									// Create a regex to match only alphabetical characters and spaces
-									var regex = /^[a-zA-Z\s]*$/;
-									if (!regex.test(provinceCountry[0].trim())) {
-									    continue;
-									}
+					        var row = '<tr data-index="' + i + '"><td>' + cityName + ', ' + stateName + ', ' + countryName + '</td></tr>';
+					        table.append(row);
+					    }
+					}
+                    
 
-									var simplifiedName = fullName[0] + "," + provinceCountry.join(',');
-									var row = '<tr data-index="' + i + '"><td>' + simplifiedName + '</td></tr>';
-									table.append(row);
-		                     
-		                        }
-		                    }
+                    if (table.find('tr').length > 0) {
+                        $('#submitButton').show();
+                    } else {
+                        $('#submitButton').hide();
+                    }
 
-		                    if (table.find('tr').length > 0) {
-		                        $('#submitButton').show();
-		                    } else {
-		                        $('#submitButton').hide();
-		                    }
+					$('#results tr').click(function() {
+					    $('#results tr').removeClass('selected');
+					    $(this).addClass('selected');
 
-		                    $('#results tr').click(function() {
-		                        $('#results tr').removeClass('selected');
-		                        $(this).addClass('selected');
+					    var index = $(this).data('index');
+					    var geojson = data[index].geojson;
 
-		                        var index = $(this).data('index');
-		                        var geojson = data[index].geojson;
+					    if (geojsonLayer != null) {
+					        map.removeLayer(geojsonLayer);
+					        geojsonLayer = null;  // Clear the variable after removing the layer
+					    }
 
-		                        if (geojsonLayer != null) {
-		                            map.removeLayer(geojsonLayer);
-		                        }
+					    geojsonLayer = L.geoJSON(geojson);
+					    geojsonLayer.addTo(map);
+					    map.fitBounds(geojsonLayer.getBounds());
 
-		                        geojsonLayer = L.geoJSON(geojson);
-		                        geojsonLayer.addTo(map);
-		                        map.fitBounds(geojsonLayer.getBounds());
+					    // Show submit button only when a row is selected
+					    $('#submitButton').toggle($(this).hasClass('selected'));
+					});
+           
+                    // Automatically select the first result
+                    $('#results tr:first-child').click();
+                });
+            });
+        });
 
-		                        // Show submit button only when a row is selected
-		                        $('#submitButton').toggle($(this).hasClass('selected'));
-		                    });
-
-		                    // Automatically select the first result
-		                    $('#results tr:first-child').click();
-		                });
-		            });
-		        });
-
-		        function confirmSubmission() {
-		            if (confirm("Are you sure you want to submit this request?")) {
-		                // Handle the submission here
-		                alert("Submitted!");
-		            }
-		        }
-		    </script>
-		</body>
-		</html>
+        function confirmSubmission() {
+            if (confirm("Are you sure you want to submit this request?")) {
+                // Handle the submission here
+                alert("Submitted!");
+            }
+        }
+    </script>
+</body>
+</html>
